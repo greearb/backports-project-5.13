@@ -1,3 +1,5 @@
+diff --git a/compat/drivers-base-devcoredump.c b/compat/drivers-base-devcoredump.c
+index 8eec0e0..dea7f86 100644
 --- a/compat/drivers-base-devcoredump.c
 +++ b/compat/drivers-base-devcoredump.c
 @@ -16,6 +16,7 @@
@@ -19,7 +21,7 @@
  struct devcd_entry {
  	struct device devcd_dev;
  	void *data;
-@@ -54,8 +59,7 @@ static void devcd_dev_release(struct dev
+@@ -54,8 +59,7 @@ static void devcd_dev_release(struct device *dev)
  	 * a struct device to know when it goes away?
  	 */
  	if (devcd->failing_dev->kobj.sd)
@@ -29,7 +31,7 @@
  
  	put_device(devcd->failing_dev);
  	kfree(devcd);
-@@ -67,6 +71,9 @@ static void devcd_del(struct work_struct
+@@ -67,6 +71,9 @@ static void devcd_del(struct work_struct *wk)
  
  	devcd = container_of(wk, struct devcd_entry, del_wk.work);
  
@@ -39,7 +41,7 @@
  	device_del(&devcd->devcd_dev);
  	put_device(&devcd->devcd_dev);
  }
-@@ -100,6 +107,7 @@ static struct bin_attribute devcd_attr_d
+@@ -100,6 +107,7 @@ static struct bin_attribute devcd_attr_data = {
  	.write = devcd_data_write,
  };
  
@@ -47,7 +49,7 @@
  static struct bin_attribute *devcd_dev_bin_attrs[] = {
  	&devcd_attr_data, NULL,
  };
-@@ -111,6 +119,7 @@ static const struct attribute_group devc
+@@ -111,6 +119,7 @@ static const struct attribute_group devcd_dev_group = {
  static const struct attribute_group *devcd_dev_groups[] = {
  	&devcd_dev_group, NULL,
  };
@@ -65,7 +67,7 @@
  	.class_groups	= devcd_class_groups,
  };
  
-@@ -292,6 +303,11 @@ void dev_coredumpm(struct device *dev, s
+@@ -292,6 +303,11 @@ void dev_coredumpm(struct device *dev, struct module *owner,
  	if (device_add(&devcd->devcd_dev))
  		goto put_device;
  
@@ -74,10 +76,10 @@
 +		goto put_device;
 +#endif
 +
- 	if (sysfs_create_link(&devcd->devcd_dev.kobj, &dev->kobj,
- 			      "failing_device"))
- 		/* nothing - symlink will be missing */;
-@@ -334,15 +350,13 @@ void dev_coredumpsg(struct device *dev,
+ 	/*
+ 	 * These should normally not fail, but there is no problem
+ 	 * continuing without the links, so just warn instead of
+@@ -337,15 +353,13 @@ void dev_coredumpsg(struct device *dev, struct scatterlist *table,
  }
  EXPORT_SYMBOL_GPL(dev_coredumpsg);
  
@@ -95,9 +97,11 @@
  	class_unregister(&devcd_class);
  }
 -__exitcall(devcoredump_exit);
+diff --git a/include/linux/backport-devcoredump.h b/include/linux/backport-devcoredump.h
+index c008169..13f2531 100644
 --- a/include/linux/backport-devcoredump.h
 +++ b/include/linux/backport-devcoredump.h
-@@ -51,7 +51,7 @@ static inline void _devcd_free_sgtable(s
+@@ -51,7 +51,7 @@ static inline void _devcd_free_sgtable(struct scatterlist *table)
  }
  
  
@@ -106,7 +110,7 @@
  void dev_coredumpv(struct device *dev, void *data, size_t datalen,
  		   gfp_t gfp);
  
-@@ -85,6 +85,6 @@ static inline void dev_coredumpsg(struct
+@@ -85,6 +85,6 @@ static inline void dev_coredumpsg(struct device *dev, struct scatterlist *table,
  {
  	_devcd_free_sgtable(table);
  }
@@ -114,6 +118,8 @@
 +#endif /* CPTCFG_BPAUTO_WANT_DEV_COREDUMP */
  
  #endif /* __DEVCOREDUMP_H */
+diff --git a/include/linux/devcoredump.h b/include/linux/devcoredump.h
+index 0d2db09..0a2f9c8 100644
 --- a/include/linux/devcoredump.h
 +++ b/include/linux/devcoredump.h
 @@ -1,6 +1,7 @@
