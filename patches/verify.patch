@@ -1,6 +1,8 @@
+diff --git a/compat/verification/pkcs7_trust.c b/compat/verification/pkcs7_trust.c
+index b531df2..3a30916 100644
 --- a/compat/verification/pkcs7_trust.c
 +++ b/compat/verification/pkcs7_trust.c
-@@ -112,7 +112,7 @@ static int pkcs7_validate_trust_one(stru
+@@ -112,7 +112,7 @@ static int pkcs7_validate_trust_one(struct pkcs7_message *pkcs7,
  	return -ENOKEY;
  
  matched:
@@ -9,6 +11,23 @@
  	key_put(key);
  	if (ret < 0) {
  		if (ret == -ENOMEM)
+diff --git a/compat/verification/x509_parser.h b/compat/verification/x509_parser.h
+index c233f13..6fc2a40 100644
+--- a/compat/verification/x509_parser.h
++++ b/compat/verification/x509_parser.h
+@@ -9,6 +9,10 @@
+ #include <crypto/public_key.h>
+ #include <keys/asymmetric-type.h>
+ 
++#define x509_decode_time LINUX_BACKPORT(x509_decode_time)
++#define x509_cert_parse LINUX_BACKPORT(x509_cert_parse)
++#define x509_free_certificate LINUX_BACKPORT(x509_free_certificate)
++
+ struct x509_certificate {
+ 	struct x509_certificate *next;
+ 	struct x509_certificate *signer;	/* Certificate that signed this one */
+diff --git a/compat/verification/x509_public_key.c b/compat/verification/x509_public_key.c
+index 3d45161..16cd65e 100644
 --- a/compat/verification/x509_public_key.c
 +++ b/compat/verification/x509_public_key.c
 @@ -9,11 +9,8 @@
@@ -23,7 +42,7 @@
  #include "x509_parser.h"
  
  /*
-@@ -153,6 +150,7 @@ not_self_signed:
+@@ -155,6 +152,7 @@ not_self_signed:
  	return 0;
  }
  
@@ -31,48 +50,16 @@
  /*
   * Attempt to parse a data blob for a key as an X509 certificate.
   */
-@@ -271,3 +269,4 @@ module_exit(x509_key_exit);
+@@ -273,3 +271,4 @@ module_exit(x509_key_exit);
  MODULE_DESCRIPTION("X.509 certificate parser");
  MODULE_AUTHOR("Red Hat, Inc.");
  MODULE_LICENSE("GPL");
 +#endif
---- a/include/crypto/pkcs7.h
-+++ b/include/crypto/pkcs7.h
-@@ -2,5 +2,10 @@
- #ifndef CPTCFG_BPAUTO_PKCS7
- #include_next <crypto/pkcs7.h>
- #else
-+#define pkcs7_verify LINUX_BACKPORT(pkcs7_verify)
-+#define pkcs7_get_content_data LINUX_BACKPORT(pkcs7_get_content_data)
-+#define pkcs7_parse_message LINUX_BACKPORT(pkcs7_parse_message)
-+#define pkcs7_free_message LINUX_BACKPORT(pkcs7_free_message)
-+#define pkcs7_validate_trust LINUX_BACKPORT(pkcs7_validate_trust)
- #include <crypto/backport-pkcs7.h>
- #endif /* CPTCFG_BPAUTO_PKCS7 */
---- a/compat/verification/x509_parser.h
-+++ b/compat/verification/x509_parser.h
-@@ -9,6 +9,10 @@
- #include <crypto/public_key.h>
- #include <keys/asymmetric-type.h>
- 
-+#define x509_decode_time LINUX_BACKPORT(x509_decode_time)
-+#define x509_cert_parse LINUX_BACKPORT(x509_cert_parse)
-+#define x509_free_certificate LINUX_BACKPORT(x509_free_certificate)
-+
- struct x509_certificate {
- 	struct x509_certificate *next;
- 	struct x509_certificate *signer;	/* Certificate that signed this one */
+diff --git a/include/crypto/backport-public_key.h b/include/crypto/backport-public_key.h
+index 47accec..c6a194b 100644
 --- a/include/crypto/backport-public_key.h
 +++ b/include/crypto/backport-public_key.h
-@@ -12,7 +12,6 @@
- 
- #include <linux/keyctl.h>
- #include <linux/oid_registry.h>
--#include <crypto/akcipher.h>
- 
- /*
-  * Cryptographic data for the public-key subtype of the asymmetric key type.
-@@ -53,34 +52,6 @@ extern void public_key_signature_free(st
+@@ -52,34 +52,6 @@ extern void public_key_signature_free(struct public_key_signature *sig);
  
  extern struct asymmetric_key_subtype public_key_subtype;
  
@@ -107,3 +94,18 @@
  int public_key_verify_signature(const struct public_key *pkey,
  				const struct public_key_signature *sig);
  
+diff --git a/include/crypto/pkcs7.h b/include/crypto/pkcs7.h
+index 4a7eb3b..c6e6e69 100644
+--- a/include/crypto/pkcs7.h
++++ b/include/crypto/pkcs7.h
+@@ -2,5 +2,10 @@
+ #ifndef CPTCFG_BPAUTO_PKCS7
+ #include_next <crypto/pkcs7.h>
+ #else
++#define pkcs7_verify LINUX_BACKPORT(pkcs7_verify)
++#define pkcs7_get_content_data LINUX_BACKPORT(pkcs7_get_content_data)
++#define pkcs7_parse_message LINUX_BACKPORT(pkcs7_parse_message)
++#define pkcs7_free_message LINUX_BACKPORT(pkcs7_free_message)
++#define pkcs7_validate_trust LINUX_BACKPORT(pkcs7_validate_trust)
+ #include <crypto/backport-pkcs7.h>
+ #endif /* CPTCFG_BPAUTO_PKCS7 */
