@@ -1,6 +1,8 @@
+diff --git a/drivers/net/wireless/intel/iwlwifi/dvm/debugfs.c b/drivers/net/wireless/intel/iwlwifi/dvm/debugfs.c
+index 9110492..53000e7 100644
 --- a/drivers/net/wireless/intel/iwlwifi/dvm/debugfs.c
 +++ b/drivers/net/wireless/intel/iwlwifi/dvm/debugfs.c
-@@ -2373,12 +2373,23 @@ void iwl_dbgfs_register(struct iwl_priv
+@@ -2373,12 +2373,23 @@ void iwl_dbgfs_register(struct iwl_priv *priv, struct dentry *dbgfs_dir)
  	 */
  	if (priv->mac80211_registered) {
  		char buf[100];
@@ -24,9 +26,11 @@
  
  		debugfs_create_symlink("iwlwifi", mac80211_dir, buf);
  	}
+diff --git a/drivers/net/wireless/intel/iwlwifi/mvm/debugfs-vif.c b/drivers/net/wireless/intel/iwlwifi/mvm/debugfs-vif.c
+index 38d0bfb..5f8eb33 100644
 --- a/drivers/net/wireless/intel/iwlwifi/mvm/debugfs-vif.c
 +++ b/drivers/net/wireless/intel/iwlwifi/mvm/debugfs-vif.c
-@@ -777,8 +777,13 @@ void iwl_mvm_vif_dbgfs_register(struct i
+@@ -722,8 +722,13 @@ void iwl_mvm_vif_dbgfs_register(struct iwl_mvm *mvm, struct ieee80211_vif *vif)
  
  	mvmvif->dbgfs_dir = debugfs_create_dir("iwlmvm", dbgfs_dir);
  	if (IS_ERR_OR_NULL(mvmvif->dbgfs_dir)) {
@@ -40,7 +44,7 @@
  		return;
  	}
  
-@@ -807,9 +812,17 @@ void iwl_mvm_vif_dbgfs_register(struct i
+@@ -752,9 +757,17 @@ void iwl_mvm_vif_dbgfs_register(struct iwl_mvm *mvm, struct ieee80211_vif *vif)
  	 * find
  	 * netdev:wlan0 -> ../../../ieee80211/phy0/netdev:wlan0/iwlmvm/
  	 */
@@ -58,18 +62,20 @@
  
  	mvmvif->dbgfs_slink = debugfs_create_symlink(dbgfs_dir->d_name.name,
  						     mvm->debugfs_dir, buf);
+diff --git a/drivers/net/wireless/intel/iwlwifi/mvm/debugfs.c b/drivers/net/wireless/intel/iwlwifi/mvm/debugfs.c
+index 96bb675..3f8e649 100644
 --- a/drivers/net/wireless/intel/iwlwifi/mvm/debugfs.c
 +++ b/drivers/net/wireless/intel/iwlwifi/mvm/debugfs.c
-@@ -2092,6 +2092,12 @@ void iwl_mvm_dbgfs_register(struct iwl_m
+@@ -2139,6 +2139,12 @@ void iwl_mvm_dbgfs_register(struct iwl_mvm *mvm)
  	 * Create a symlink with mac80211. It will be removed when mac80211
  	 * exists (before the opmode exists which removes the target.)
  	 */
 +#if LINUX_VERSION_IS_GEQ(3,12,0)
- 	snprintf(buf, 100, "../../%pd2", dbgfs_dir->d_parent);
+ 	snprintf(buf, 100, "../../%pd2", mvm->debugfs_dir->d_parent);
 +#else
 +	snprintf(buf, 100, "../../%s/%s",
-+		 dbgfs_dir->d_parent->d_parent->d_name.name,
-+		 dbgfs_dir->d_parent->d_name.name);
++		 mvm->debugfs_dir->d_parent->d_parent->d_name.name,
++		 mvm->debugfs_dir->d_parent->d_name.name);
 +#endif
  	debugfs_create_symlink("iwlwifi", mvm->hw->wiphy->debugfsdir, buf);
  }
