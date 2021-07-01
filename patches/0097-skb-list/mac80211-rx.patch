@@ -7,9 +7,12 @@ were added only with kernel 4.19. Use the next pointer in the skb on
 the older kernel instead. The list attributes where also backported to
 4.14, but to make it easier, just use the next pointer also there.
 
+
+diff --git a/include/net/mac80211.h b/include/net/mac80211.h
+index 9dcf1c4..1ce9ce7 100644
 --- a/include/net/mac80211.h
 +++ b/include/net/mac80211.h
-@@ -4450,7 +4450,11 @@ void ieee80211_restart_hw(struct ieee802
+@@ -4499,7 +4499,11 @@ void ieee80211_restart_hw(struct ieee80211_hw *hw);
   * @list: the destination list
   */
  void ieee80211_rx_list(struct ieee80211_hw *hw, struct ieee80211_sta *sta,
@@ -21,9 +24,11 @@ the older kernel instead. The list attributes where also backported to
  
  /**
   * ieee80211_rx_napi - receive frame from NAPI context
+diff --git a/net/mac80211/ieee80211_i.h b/net/mac80211/ieee80211_i.h
+index 6d5212b..cd5f6a8 100644
 --- a/net/mac80211/ieee80211_i.h
 +++ b/net/mac80211/ieee80211_i.h
-@@ -199,7 +199,11 @@ enum ieee80211_rx_flags {
+@@ -200,7 +200,11 @@ enum ieee80211_rx_flags {
  };
  
  struct ieee80211_rx_data {
@@ -35,9 +40,11 @@ the older kernel instead. The list attributes where also backported to
  	struct sk_buff *skb;
  	struct ieee80211_local *local;
  	struct ieee80211_sub_if_data *sdata;
+diff --git a/net/mac80211/rx.c b/net/mac80211/rx.c
+index bebed47..ac9843c 100644
 --- a/net/mac80211/rx.c
 +++ b/net/mac80211/rx.c
-@@ -2605,7 +2605,11 @@ static void ieee80211_deliver_skb_to_loc
+@@ -2696,7 +2696,11 @@ static void ieee80211_deliver_skb_to_local_stack(struct sk_buff *skb,
  
  		/* deliver to local stack */
  		if (rx->list)
@@ -49,7 +56,7 @@ the older kernel instead. The list attributes where also backported to
  		else
  			netif_receive_skb(skb);
  	}
-@@ -4545,7 +4549,11 @@ static bool ieee80211_invoke_fast_rx(str
+@@ -4551,7 +4555,11 @@ static void ieee80211_rx_8023(struct ieee80211_rx_data *rx,
  	skb->protocol = eth_type_trans(skb, fast_rx->dev);
  	memset(skb->cb, 0, sizeof(skb->cb));
  	if (rx->list)
@@ -61,19 +68,19 @@ the older kernel instead. The list attributes where also backported to
  	else
  		netif_receive_skb(skb);
  
-@@ -4612,7 +4620,11 @@ static bool ieee80211_prepare_and_rx_han
+@@ -4774,7 +4782,11 @@ drop:
  static void __ieee80211_rx_handle_packet(struct ieee80211_hw *hw,
  					 struct ieee80211_sta *pubsta,
  					 struct sk_buff *skb,
 +#if LINUX_VERSION_IS_GEQ(4,19,0)
- 					 struct list_head *list)
+ 					 struct list_head *list,
 +#else
-+					 struct sk_buff_head *list)
++					 struct sk_buff_head *list,
 +#endif
+ 					 struct ieee80211_radiotap_he *radiotap_he)
  {
  	struct ieee80211_local *local = hw_to_local(hw);
- 	struct ieee80211_sub_if_data *sdata;
-@@ -4737,7 +4749,11 @@ static void __ieee80211_rx_handle_packet
+@@ -4919,7 +4931,11 @@ rx_and_done:
   * 802.11 MPDU is received from the hardware.
   */
  void ieee80211_rx_list(struct ieee80211_hw *hw, struct ieee80211_sta *pubsta,
@@ -85,7 +92,7 @@ the older kernel instead. The list attributes where also backported to
  {
  	struct ieee80211_local *local = hw_to_local(hw);
  	struct ieee80211_rate *rate = NULL;
-@@ -4854,7 +4870,13 @@ void ieee80211_rx_napi(struct ieee80211_
+@@ -5043,7 +5059,13 @@ void ieee80211_rx_napi(struct ieee80211_hw *hw, struct ieee80211_sta *pubsta,
  		       struct sk_buff *skb, struct napi_struct *napi)
  {
  	struct sk_buff *tmp;
@@ -99,7 +106,7 @@ the older kernel instead. The list attributes where also backported to
  
  
  	/*
-@@ -4871,8 +4893,13 @@ void ieee80211_rx_napi(struct ieee80211_
+@@ -5060,8 +5082,13 @@ void ieee80211_rx_napi(struct ieee80211_hw *hw, struct ieee80211_sta *pubsta,
  		return;
  	}
  
