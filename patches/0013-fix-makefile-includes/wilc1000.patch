@@ -1,6 +1,9 @@
 linux/interrupt.h include needed for kernel 4.14
 linux/module.h include needed for kernel 3.18
 
+
+diff --git a/drivers/net/wireless/microchip/wilc1000/netdev.c b/drivers/net/wireless/microchip/wilc1000/netdev.c
+index 7e4d923..193bea9 100644
 --- a/drivers/net/wireless/microchip/wilc1000/netdev.c
 +++ b/drivers/net/wireless/microchip/wilc1000/netdev.c
 @@ -9,6 +9,8 @@
@@ -12,6 +15,8 @@ linux/module.h include needed for kernel 3.18
  
  #include "cfg80211.h"
  #include "wlan_cfg.h"
+diff --git a/drivers/net/wireless/microchip/wilc1000/sdio.c b/drivers/net/wireless/microchip/wilc1000/sdio.c
+index e14b9fc..e12dd93 100644
 --- a/drivers/net/wireless/microchip/wilc1000/sdio.c
 +++ b/drivers/net/wireless/microchip/wilc1000/sdio.c
 @@ -10,6 +10,7 @@
@@ -22,12 +27,14 @@ linux/module.h include needed for kernel 3.18
  
  #include "netdev.h"
  #include "cfg80211.h"
+diff --git a/drivers/net/wireless/microchip/wilc1000/spi.c b/drivers/net/wireless/microchip/wilc1000/spi.c
+index 1472e98..d07e599 100644
 --- a/drivers/net/wireless/microchip/wilc1000/spi.c
 +++ b/drivers/net/wireless/microchip/wilc1000/spi.c
-@@ -7,6 +7,7 @@
- #include <linux/clk.h>
+@@ -8,6 +8,7 @@
  #include <linux/spi/spi.h>
  #include <linux/crc7.h>
+ #include <linux/crc-itu-t.h>
 +#include <linux/module.h>
  
  #include "netdev.h"
